@@ -13,6 +13,6 @@ const client = new Client({
 
 client.connect()
     .then(()=> console.log("Connecté à la base de donnée !"))
-    .catch(err => console.log("Erreur à la connexion =>", err))
+    .catch(err => console.log("Erreur à la connexion =>", err.stack))
 
 module.exports = client;
