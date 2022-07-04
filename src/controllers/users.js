@@ -35,6 +35,10 @@ const userController = {
             console.error(error);
             res.status(500).json(error);
         }
+    },
+
+    async loginUser(req, res) {
+        const { email, password } = req.body;
     }
 }
 

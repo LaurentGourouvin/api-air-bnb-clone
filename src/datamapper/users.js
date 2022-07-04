@@ -19,12 +19,15 @@ const usersDataMapper = {
 
         try {
             const resultCreateUser = await client.query(createUserQuery, valuesQuery);
-            console.log('création user ?',resultCreateUser);
             return resultCreateUser.rows[0];
         }
         catch (error) {
             console.error(error);
         }
+    },
+
+    async loginUser(){
+        
     }
 }
 
