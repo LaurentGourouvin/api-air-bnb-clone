@@ -5,7 +5,7 @@ require('dotenv').config();
 
 // import own module
 const usersDataMapper = require('../datamapper/users')
-const userValidator = require('../validator/users')
+const { createUserSchema } = require('../validator/users')
 
 const userController = {
     async getUsers(_,res){
@@ -20,12 +20,15 @@ const userController = {
     },
     
     async createUser(req,res, next) {
+        console.log("$ USERS CONTROLLER => ");
+        console.log("$ req_body", req.body);
         const { username, firstname, lastname, password, email } = req.body;
         const user = { username, firstname, lastname, password, email };
 
         // Vérification JOI
-        const {value, error} = userValidator.validate(user);
+        const {value, error} = createUserSchema.validate(user);
         if(error) {
+            console.log("$ JOI VALIDATE => ",error)
             res.status(500).json(error.details)
             return next();
         }
