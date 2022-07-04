@@ -40,8 +40,11 @@ const userController = {
             user.password = hashPassword;
 
             const createUser = await usersDataMapper.createUser(user);
-            if(createUser.id){
-                res.status(200).json(createUser);
+            if(createUser){
+                res.status(201).json(createUser);
+            }
+            else {
+                res.status(409).json({message: "L'utilisateur existe déjà ! Essayez de vous connecter à votre compte."});
             }
         }
         catch (error) {
@@ -66,22 +69,25 @@ const userController = {
         }
 
         try {
-            const salt = await bcrypt.genSaltSync(10);
-            const hashPassword = await bcrypt.hashSync(password, salt);
-            user.password = hashPassword;
+            // const salt = await bcrypt.genSaltSync(10);
+            // const hashPassword = await bcrypt.hashSync(password, salt);
+            // user.password = hashPassword;
 
-            const loginUser = usersDataMapper.loginUser(user);
+            const loginUser = await usersDataMapper.loginUser(user);
+            
             if(loginUser){
                 const userToken = jwt.sign(user, process.env.SECRET_TOKEN, {algorithm: 'HS256', expiresIn: '1h'});
-                res.status(200).json(userToken);
+                res.status(200).json({user_token: userToken});
+            }
+            else {
+                res.status(401).json({message: "Identifiants de connexion incorrect !"})
             }
         }
         catch (error) {
             console.error(error);
             res.status(500).json(error);
         }
-        
-    }
+    },
 }
 
 module.exports = userController;
