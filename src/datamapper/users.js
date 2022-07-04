@@ -26,8 +26,27 @@ const usersDataMapper = {
         }
     },
 
-    async loginUser(){
-        
+    async loginUser(user){
+        const loginUserQuery = `SELECT * FROM "users" where email = '${user.email}';`
+
+        try {
+            const resultLoginUser = await client.query(loginUserQuery);
+            if(resultLoginUser.rowCount > 1 || resultLoginUser.rowCount === 0) {
+                return false;
+            }
+            else {
+                const compareUser = resultLoginUser.rows[0];
+                if(user.password === compareUser.password) {
+                    return compareUser;
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        catch (error){
+            console.log(error)
+        }
     }
 }
 

@@ -5,7 +5,7 @@ require('dotenv').config();
 
 // import own module
 const usersDataMapper = require('../datamapper/users')
-const { createUserSchema } = require('../validator/users')
+const { createUserSchema, loginUserSchema } = require('../validator/users')
 
 const userController = {
     async getUsers(_,res){
@@ -20,7 +20,7 @@ const userController = {
     },
     
     async createUser(req,res, next) {
-        console.log("$ USERS CONTROLLER => ");
+        console.log("$ USERS CONTROLLER => createUser() => ");
         console.log("$ req_body", req.body);
         const { username, firstname, lastname, password, email } = req.body;
         const user = { username, firstname, lastname, password, email };
@@ -28,7 +28,7 @@ const userController = {
         // Vérification JOI
         const {value, error} = createUserSchema.validate(user);
         if(error) {
-            console.log("$ JOI VALIDATE => ",error)
+            console.log("$ JOI VALIDATE => createUserSchema() => ",error)
             res.status(500).json(error.details)
             return next();
         }
@@ -51,8 +51,36 @@ const userController = {
         next();
     },
 
-    async loginUser(req, res) {
+    async loginUser(req, res, next) {
+        console.log("$ USERS CONTROLLER => loginUser() => ");
+        console.log("$ req_body", req.body);
         const { email, password } = req.body;
+        const user = { email, password };
+
+        // Vérification JOI
+        const {value, error} = loginUserSchema.validate(user);
+        if(error) {
+            console.log("$ JOI VALIDATE => loginUser () => ",error)
+            res.status(500).json(error.details)
+            return next();
+        }
+
+        try {
+            const salt = await bcrypt.genSaltSync(10);
+            const hashPassword = await bcrypt.hashSync(password, salt);
+            user.password = hashPassword;
+
+            const loginUser = usersDataMapper.loginUser(user);
+            if(loginUser){
+                const userToken = jwt.sign(user, process.env.SECRET_TOKEN, {algorithm: 'HS256', expiresIn: '1h'});
+                res.status(200).json(userToken);
+            }
+        }
+        catch (error) {
+            console.error(error);
+            res.status(500).json(error);
+        }
+        
     }
 }
 
