@@ -69,9 +69,6 @@ const userController = {
         }
 
         try {
-            // const salt = await bcrypt.genSaltSync(10);
-            // const hashPassword = await bcrypt.hashSync(password, salt);
-            // user.password = hashPassword;
 
             const loginUser = await usersDataMapper.loginUser(user);
             
