@@ -22,7 +22,7 @@ const userController = {
     async createUser(req,res, next) {
         console.log("$ USERS CONTROLLER => createUser() => ");
         console.log("$ req_body", req.body);
-        const { username, firstname, lastname, password, email } = req.body;
+        const { username, firstname, lastname, password, email } = req.body.newUser;
         const user = { username, firstname, lastname, password, email };
 
         // Vérification JOI
