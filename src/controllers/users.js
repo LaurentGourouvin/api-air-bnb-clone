@@ -74,7 +74,11 @@ const userController = {
             
             if(loginUser){
                 const userToken = jwt.sign(user, process.env.SECRET_TOKEN, {algorithm: 'HS256', expiresIn: '1h'});
-                res.status(200).json({user_token: userToken});
+                res
+                    .cookie("acces_token", userToken, {httpOnly: true, sameSite: true})
+                    .status(200)
+                    .json({user_token: userToken});
+                
             }
             else {
                 res.status(401).json({message: "Identifiants de connexion incorrect !"})

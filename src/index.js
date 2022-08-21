@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 const router = require('./routes/router')
@@ -10,9 +11,11 @@ const apiRouter = require('./routes/apiRoutes')
 app.use(morgan('tiny'), (req, res, next) => { console.log(new Date()); next()});
 
 app.use(cors({
-    "origin": "*"
+    "origin": "http://localhost:3000",
+    credentials: true,
 }))
 
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended : true}))
 
