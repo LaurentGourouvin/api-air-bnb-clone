@@ -1,25 +1,26 @@
-const bcrypt= require('bcrypt');
-const client = require('../db');
+import bcrypt from 'bcrypt';
+import client from '../db';
+
 
 const usersDataMapper = {
 
-    async createUser(user){
+    async createUser(user: any){
         const {username, firstname, lastname, password, email} = user;
-        const createUserQuery = `INSERT INTO "users"(username, firstname, lastname, password, email) VALUES ($1,$2,$3,$4,$5) RETURNING *`;
-        const valuesQuery = [username, firstname, lastname, password, email];
+        const createUserQuery: string = `INSERT INTO "users"(username, firstname, lastname, password, email) VALUES ($1,$2,$3,$4,$5) RETURNING *`;
+        const valuesQuery: string[] = [username, firstname, lastname, password, email];
 
         try {
-            const allUser = await this.findAll();
-            console.log("AllUser =>", allUser)
+            const resultAllUsers: any = await this.findAll();
+            console.log("AllUser =>", resultAllUsers)
             let existUser = null;
-            if(allUser.length > 0) {
-                existUser = allUser.find((user) => user.email.toLowerCase() === email.toLowerCase())
+            if(resultAllUsers.length > 0) {
+                existUser = resultAllUsers.find((rowOfOneUser : any) => rowOfOneUser.email.toLowerCase() === email.toLowerCase())
                 console.log("existeUser => ", existUser)
             }
             if(existUser){
                 return false;
             }
-            const resultCreateUser = await client.query(createUserQuery, valuesQuery);
+            const resultCreateUser: any = await client.query(createUserQuery, valuesQuery);
             return resultCreateUser.rows[0];
         }
         catch (error) {
@@ -27,18 +28,18 @@ const usersDataMapper = {
         }
     },
 
-    async loginUser(user){
-        const loginUserQuery = `SELECT * FROM "users" where email = '${user.email}';`
+    async loginUser(user : any){
+        const loginUserQuery: string = `SELECT * FROM "users" where email = '${user.email}';`
 
         try {
-            const resultLoginUser = await client.query(loginUserQuery);
+            const resultLoginUser: any = await client.query(loginUserQuery);
             if(resultLoginUser.rowCount > 1 || resultLoginUser.rowCount === 0) {
                 return false;
             }
             else {
                 console.log("je compare les mdps")
-                const compareUser = resultLoginUser.rows[0];
-                const matchPassword = await bcrypt.compareSync(user.password, compareUser.password);
+                const compareUser: any = resultLoginUser.rows[0];
+                const matchPassword: boolean = await bcrypt.compareSync(user.password, compareUser.password);
                 console.log("matchPassword => ", matchPassword)
                 if(matchPassword) {
                     console.log('les mots de passes sont identiques !');
@@ -56,8 +57,8 @@ const usersDataMapper = {
 
     async findAll(){
         try{
-            const findAllQuery = `SELECT * from "users";`
-            const resultFindAllQuery = await client.query(findAllQuery);
+            const findAllQuery: string = `SELECT * from "users";`
+            const resultFindAllQuery: any = await client.query(findAllQuery);
             console.log("findAll user => ", resultFindAllQuery)
             if(resultFindAllQuery.rowCount === 0) {
                 return false
@@ -72,4 +73,4 @@ const usersDataMapper = {
     }
 }
 
-module.exports = usersDataMapper;
+export default usersDataMapper;

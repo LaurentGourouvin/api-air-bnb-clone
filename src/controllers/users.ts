@@ -1,25 +1,27 @@
 // import node module
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-require('dotenv').config();
+import { NextFunction, Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // import own module
-const usersDataMapper = require('../datamapper/users')
-const { createUserSchema, loginUserSchema } = require('../validator/users')
+import usersDataMapper from '../datamapper/users';
+import { createUserSchema, loginUserSchema } from '../validator/users';
 
 const userController = {
-    async getUsers(_,res){
-        try {
-            const users = await usersDataMapper.getUsers();
-            res.json(users)
-        }
-        catch (error) {
-            console.error(error);
-            res.status(500).json(error)
-        }
-    },
-    
-    async createUser(req,res, next) {
+    // async getUsers(req: Request, res: Response){
+    //     try {
+    //         const users: any = await usersDataMapper.getUsers();
+    //         res.json(users)
+    //     }
+    //     catch (error) {
+    //         console.error(error);
+    //         res.status(500).json(error)
+    //     }
+    // },
+
+    async createUser(req: Request, res: Response, next: NextFunction) {
         console.log("$ USERS CONTROLLER => createUser() => ");
         console.log("$ req_body", req.body);
         const { username, firstname, lastname, password, email } = req.body.newUser;
@@ -35,8 +37,8 @@ const userController = {
         // Création du compte utilisateur dans la BDD
         try {
             // hash du mot de passe de l'utilisateur
-            const salt = await bcrypt.genSaltSync(10);
-            const hashPassword = await bcrypt.hashSync(password, salt);
+            const salt: string = await bcrypt.genSaltSync(10);
+            const hashPassword: string = await bcrypt.hashSync(password, salt);
             user.password = hashPassword;
 
             const createUser = await usersDataMapper.createUser(user);
@@ -54,7 +56,7 @@ const userController = {
         next();
     },
 
-    async loginUser(req, res, next) {
+    async loginUser(req: Request, res: Response, next: NextFunction) {
         console.log("$ USERS CONTROLLER => loginUser() => ");
         console.log("$ req_body", req.body);
         const { email, password } = req.body;
@@ -71,15 +73,14 @@ const userController = {
         try {
 
             const loginUser = await usersDataMapper.loginUser(user);
-            
+
             if(loginUser){
-                const userToken = jwt.sign(user, process.env.SECRET_TOKEN, {algorithm: 'HS256', expiresIn: '1h'});
+                const userToken = jwt.sign(user, process.env.SECRET_TOKEN ?? '', {algorithm: 'HS256', expiresIn: '1h'});
                 res
                     .cookie("acces_token", userToken, {httpOnly: true, sameSite: true})
                     .status(200)
                     .json({user_token: userToken});
-                
-            }
+           }
             else {
                 res.status(401).json({message: "Identifiants de connexion incorrect !"})
             }
@@ -91,4 +92,4 @@ const userController = {
     },
 }
 
-module.exports = userController;
+export default userController;
